@@ -16,10 +16,10 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 $firewallRuleName = "Windows Remote Management (HTTP-In)"
 $firewallRule = Get-NetFirewallRule -Name $firewallRuleName -ErrorAction SilentlyContinue
 
-if ($firewallRule -eq $null) {
+if ($null -eq $firewallRule) {
     # Create the firewall rule if it doesn't exist
     $firewallRule = New-NetFirewallRule -DisplayName $firewallRuleName -Direction Inbound -Protocol TCP -LocalPort 5985 -Action Allow -Enabled True
-    if ($firewallRule -eq $null) {
+    if ($null -eq $firewallRule) {
         Write-Host "Failed to create the firewall rule."
         exit
     }
