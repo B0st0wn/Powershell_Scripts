@@ -44,20 +44,22 @@ try {
     exit 1
 }
 
-# Stop transcript logging and close the log file
-Stop-Transcript
-
 # Compress old logs
 $zipPath = Join-Path -Path $folderPath -ChildPath "old_logs.zip"
-Get-ChildItem -Path $folderPath -Filter "*.txt" | Where-Object { $_.FullName -ne $logPath } | ForEach-Object {
-    # If the zip file doesn't exist, create a new one
+$oldLogs = Get-ChildItem -Path $folderPath -Filter "*.txt" | Where-Object { $_.FullName -ne $logPath }
+if ($oldLogs.Count -gt 0) {
     if (!(Test-Path -Path $zipPath)) {
-        [System.IO.Compression.ZipFile]::CreateFromDirectory($_.DirectoryName, $zipPath)
+        [System.IO.Compression.ZipFile]::CreateFromDirectory($folderPath, $zipPath, 'Optimal', $false)
     } else {
-        # If the zip file exists, add the file to the existing zip
-        [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile([System.IO.Compression.ZipFile]::Open($zipPath, 'Update'), $_.FullName, $_.Name)
+        $zipFile = [System.IO.Compression.ZipFile]::Open($zipPath, 'Update')
+        foreach ($oldLog in $oldLogs) {
+            $zipEntry = $zipFile.CreateEntryFromFile($oldLog.FullName, $oldLog.Name)
+            $zipEntry.LastWriteTime = $oldLog.LastWriteTime
+        }
+        $zipFile.Dispose()
     }
-
-    # Delete the old log file after compressing it
-    Remove-Item -Path $_.FullName
+    $oldLogs | Remove-Item -Force
 }
+
+# Stop transcript logging and close the log file
+Stop-Transcript
