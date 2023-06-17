@@ -1,3 +1,12 @@
+<#Editor: Visual Studio Code
+Script Name: DCU_Admin_Run_Only.ps1
+Author: Paul Hanlon
+Date: 04/18/2023
+Description: 
+  This PowerShell script forces Dell Command | Update to be run only by domain admin
+#>
+
+
 # Set the user/group name
 $domainAdmins = "DOMAIN\Domain Admins"
 
