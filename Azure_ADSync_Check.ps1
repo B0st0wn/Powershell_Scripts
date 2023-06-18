@@ -1,5 +1,5 @@
-<
-#Editor: Visual Studio Code
+<#
+Editor: Visual Studio Code
 Script Name: Test.ps1
 Author: Paul Hanlon
 Date: 6/16/2023
