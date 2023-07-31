@@ -3,7 +3,8 @@ Script Name: vCenter_Win_Update.ps1
 Author: Paul Hanlon
 Date: 6/13/2023
 Description: This PowerShell script automates the process of updating Windows-based VMs on a vCenter server. 
-It takes a snapshot of each VM, installs security updates, checks for service errors, and outputs the results to a CSV file.#>
+It takes a snapshot of each VM, installs security updates, checks for service errors, and outputs the results to a CSV file.
+This was for a job that they didnt select me. Fuck them as it was their loss.#>
 
 # Import the VMware PowerCLI module
 Import-Module VMware.PowerCLI
