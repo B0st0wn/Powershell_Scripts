@@ -1,33 +1,22 @@
-# Get the name of the current computer
-$computer = $env:COMPUTERNAME
-
 # Check if Windows is already activated
-$isActivated = Invoke-Command -ComputerName $computer { 
-    # Use Get-CimInstance to retrieve information about installed software licensing products
-    $activated = (Get-CimInstance -ClassName SoftwareLicensingProduct | 
-                  Where-Object PartialProductKey | # Filter out products that do not have a partial product key (i.e. not installed)
-                  Select-Object -ExpandProperty LicenseStatus) -contains 'Licensed' # Check if any installed products have a LicenseStatus of 'Licensed'
-    return $activated
-} -SessionOption (New-PSSessionOption -NoMachineProfile)
+$isActivated = (Get-CimInstance -ClassName SoftwareLicensingProduct |
+                Where-Object PartialProductKey | # Filter out products without a partial product key (i.e. not installed)
+                Select-Object -ExpandProperty LicenseStatus) -contains 'Licensed' # Check if any products have a 'Licensed' status
 
 # If Windows is already activated, display a message and exit
 if ($isActivated) {
     Write-Host "Windows is already activated."
 } else {
-    # If Windows is not activated, set the product key to use for activation
-    $productKey = "WINDOWS_KEY"
+    # Product key
+    $productKey = "#####-#####-#####-#####-#####" # Replace "WINDOWS_KEY" with your actual product key
 
-    # Activate Windows using the specified product key
-    Invoke-Command -ComputerName $computer { 
-        # Use cscript.exe and slmgr.vbs to install the product key and activate Windows
-        cscript.exe $env:SystemRoot\System32\slmgr.vbs -ipk $using:productKey
-        cscript.exe $env:SystemRoot\System32\slmgr.vbs /ato 
-    } -SessionOption (New-PSSessionOption -NoMachineProfile)
+    # Activate Windows using the hardcoded product key
+    slmgr -ipk $productKey
+    slmgr /ato
 
     # Display a message indicating that activation is complete
-    Write-Host "Activation complete."
+    Write-Host "Activation attempt complete. Please check if Windows is activated."
 }
 
-# Pause the script until the user presses Enter
-Read-Host "Press Enter to exit."
-
+# Pause the script with a clearer prompt message
+Read-Host "Press Enter to exit the script."
