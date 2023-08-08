@@ -1,18 +1,26 @@
-function UserDataSize {
+function Get-UserDataSize {
+    # Create an array to store the user data sizes
+    $userData = @()
+
     # Get a list of all directories under C:\Users, and iterate through each one
-    Get-ChildItem -force 'C:\Users'-ErrorAction SilentlyContinue | Where-Object { $_ -is [io.directoryinfo] } | ForEach-Object {
-        # Initialize a variable to store the total size of the current user's directory
-        $len = 0
-        # Recursively search for all files within the current user's directory, and iterate through each one
-        Get-ChildItem -recurse -force $_.fullname -ErrorAction SilentlyContinue | ForEach-Object { $len += $_.length }
-        # Display the current user's directory name and size in GB
-        $_.fullname, '{0:N2} GB' -f ($len / 1Gb)
-        # Add the current user's directory size to the total sum
-        $sum = $sum + $len
+    Get-ChildItem -Force 'C:\Users' -ErrorAction SilentlyContinue | Where-Object { $_ -is [io.directoryinfo] } | ForEach-Object {
+        # Calculate the total size of the current user's directory
+        $totalSize = Get-ChildItem -Recurse -File -Force $_.FullName -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum | Select-Object -ExpandProperty Sum
+
+        # Create a custom object to store the user's directory name and size
+        $userData += [PSCustomObject]@{
+            'User' = $_.Name
+            'Size (GB)' = [math]::Round($totalSize / 1GB, 2)
+        }
     }
-    # Display the total size of all user profiles in GB
-    “Total size of profiles”, '{0:N2} GB' -f ($sum / 1Gb)
+
+    # Display the user sizes
+    $userData | Format-Table -AutoSize
+
+    # Calculate and display the total size of all user profiles
+    $sum = ($userData | Measure-Object 'Size (GB)' -Sum).Sum
+    Write-Output "Total size of profiles: $($sum) GB"
 }
 
-# Call the UserDataSize function to execute it
-UserDataSize
+# Call the Get-UserDataSize function to execute it
+Get-UserDataSize
