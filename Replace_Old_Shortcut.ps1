@@ -1,26 +1,26 @@
-#Define the old and new links
-$oldLink = "old link"
-$newLink = "new link"
+# Prompt user for inputs
+$folderName = Read-Host "Enter the folder name (e.g., MyFolder)"
+$iconName = Read-Host "Enter the name of the icon file (e.g., icon.ico)"
+$link = Read-Host "Enter the URL for the shortcut"
+$shortcutName = Read-Host "Enter the name for the shortcut (e.g., MyShortcut.lnk)"
 
-#Get the user's desktop folder path
-$userDesktop = [Environment]::GetFolderPath("Desktop")
+# Create the full path to the directory
+$fullFolderPath = Join-Path -Path "C:\Program Files (x86)\" -ChildPath $folderName
 
-#Find all shortcut files in the user's desktop folder
-$shortcuts = Get-ChildItem -Path $userDesktop -Filter "*.lnk"
-
-#Loop through each shortcut file
-foreach($shortcut in $shortcuts) {
-
-    #Get the target path of the shortcut file
-    $targetPath = $shortcut.TargetPath
-
-    #Check if the target path of the shortcut file matches the old link
-    if($targetPath -eq $oldLink) {
-
-        #Remove the shortcut file from the user's desktop folder
-        Remove-Item $shortcut -Force -ErrorAction SilentlyContinue
-
-        #Create a new shortcut file in the user's desktop folder with the new link
-        New-Item -ItemType Shortcut -Path $userDesktop -Name "New Shortcut" -Target $newLink
-    }
+# Check if directory exists, if not, create it
+if (-not (Test-Path $fullFolderPath)) {
+    New-Item -Path $fullFolderPath -ItemType Directory
 }
+
+# Copy the icon file to the directory
+Copy-Item -Path $iconName -Destination $fullFolderPath -ErrorAction SilentlyContinue
+
+# Create or replace the desktop shortcut
+$shell = New-Object -ComObject "WScript.Shell"
+$shortcut = $shell.CreateShortcut((Join-Path $shell.SpecialFolders.Item("AllUsersDesktop") $shortcutName))
+
+# Set the icon location
+$shortcut.IconLocation = Join-Path -Path $fullFolderPath -ChildPath $iconName
+
+$shortcut.TargetPath = $link
+$shortcut.Save()
