@@ -1,0 +1,2 @@
+Update-MpSignature -UpdateSource MicrosoftUpdateServer
+exit 69
